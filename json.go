@@ -21,7 +21,7 @@ func respondWithError(w http.ResponseWriter, code int, msg string) {
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, playload interface{}) {
-	dat, err := json.Marshal(playload)
+	data, err := json.Marshal(playload)
 
 	if err != nil {
 		log.Printf("Failed to marshal JSON response: %v\n", playload)
@@ -31,5 +31,5 @@ func respondWithJSON(w http.ResponseWriter, code int, playload interface{}) {
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(code) // Everything went well
-	w.Write(dat)        // Write JSON data
+	w.Write(data)        // Write JSON data
 }

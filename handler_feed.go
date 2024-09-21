@@ -10,9 +10,11 @@ import (
 	"github.com/xclamation/go-rss-agg/internal/database"
 )
 
-func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Request) {
+// Authenticated entry point so we know the user that calls this function
+func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Request, user database.User) {
 	type parameters struct {
 		Name string `json:"name"`
+		URL  string `json:"url"`
 	}
 	decoder := json.NewDecoder(r.Body)
 
@@ -22,11 +24,13 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
+	feed, err := apiCfg.DB.CreateFeed(r.Context(), database.CreateFeedParams{
 		ID:        uuid.New(), // Smth like this: "e041b0f8-80b1-4db8-8fa1-2f0423adc2e8"
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
+		Url:       params.URL,
+		UserID:    user.ID,
 	})
 
 	if err != nil {
@@ -34,9 +38,5 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	respondWithJSON(w, 201, databaseUserToUser(user)) // 201 - created errors code
-}
-
-func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request, user database.User) {
-	respondWithJSON(w, 200, databaseUserToUser(user))
+	respondWithJSON(w, 201, databaseFeedToFeed(feed)) // 201 - created errors code
 }

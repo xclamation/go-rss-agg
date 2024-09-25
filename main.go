@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -20,7 +21,6 @@ type apiConfig struct {
 }
 
 func main() {
-
 	godotenv.Load()
 
 	portString := os.Getenv("PORT")
@@ -35,9 +35,13 @@ func main() {
 
 	conn, err := sql.Open("postgres", dbURL)
 
+	db := database.New(conn)
+
 	apiCfg := apiConfig{
 		DB: database.New(conn),
 	}
+
+	go startScraping(db, 10, time.Minute)
 
 	if err != nil {
 		log.Fatal("Can't connect to database:", err)
